@@ -76,13 +76,13 @@ def call_model_rerank_w_scores_batch(prompt, evidences, model, max_new_tokens=15
                 if id not in pred_log_probs[0]:
                     score_dict[tok] = -100
                 prob = pred_log_probs[0][id]
-                score_dict[tok] = float(prob)
+                score_dict[tok] = np.exp(float(prob))
             do_retrieve = score_dict["[Retrieval]"] / (
                 score_dict["[Retrieval]"] + score_dict["[No Retrieval]"]) > threshold
         else:
             do_retrieve = "[Retrieval]" in pred
 
-    if do_retrieve is True:
+    if do_retrieve:
         evidence_augmented_inputs = [prompt + "[Retrieval]<paragraph>{0}\n{1}</paragraph>".format(
             para["title"], para["text"]) for para in evidences]
         sampling_params = SamplingParams(
